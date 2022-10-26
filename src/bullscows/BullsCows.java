@@ -52,8 +52,8 @@ public class BullsCows {
                 if (input[i] == this.code[i]) {
                     bulls += 1;
                 } else {
-                    for (int j = 0; i < code.length; i++) {
-                        if (input[i] == code[j]) {
+                    for (int j : code) {
+                        if (input[i] == j) {
                             cows += 1;
                         }
                     }
