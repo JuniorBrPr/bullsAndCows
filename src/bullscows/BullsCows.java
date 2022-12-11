@@ -1,40 +1,42 @@
 package bullscows;
 
-import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Scanner;
+import java.util.Set;
 
 public class BullsCows {
     private int turn;
     private int[] code;
-    final private static Scanner in = new Scanner(System.in);
 
     public BullsCows() {
         this.turn = 0;
         setCode();
+
+        game();
     }
 
-    public void game() {
+    private void game() {
         boolean guessed = false;
-
-        System.out.println("The secret code is prepared: ****.\n\n");
+        System.out.println("Okay, let's start a game!");
 
         do {
             ++this.turn;
-            String userInput;
             String bullGrade;
             String cowGrade;
             boolean userInputCorrect = false;
-            int[] input = new int[4];
+            int[] input = new int[this.code.length];
 
-            System.out.println("Turn " + this.turn + ". Answer:");
+            System.out.println("Turn " + this.turn + ":");
 
             do {
-                userInput = in.nextLine();
+                Scanner in = new Scanner(System.in);
+                String userInput = in.nextLine();
+
                 if (userInput == null) {
                     System.out.println("\nInvalid input!\nTry again!\n");
                 } else {
-                    if (!userInput.matches("\\d\\d\\d\\d")) {
-                        System.out.println("\nWrong code pattern!\nShould be a 4 digit code !\n");
+                    if (!userInput.matches("\\d*") || userInput.length() > code.length) {
+                        System.out.println("\nWrong code pattern!");
                     } else {
                         String[] inputStringArray = userInput.split("");
                         for (int i = 0; i < inputStringArray.length; i++) {
@@ -48,7 +50,7 @@ public class BullsCows {
             int bulls = 0;
             int cows = 0;
 
-            for (int i = 0; i < userInput.length(); i++) {
+            for (int i = 0; i < code.length; i++) {
                 if (input[i] == this.code[i]) {
                     bulls += 1;
                 } else {
@@ -77,17 +79,22 @@ public class BullsCows {
             }
 
             if (!cowGrade.equals("") && !bullGrade.equals("")) {
-                System.out.println("Grade: " + bullGrade + " and " + cowGrade + ".");
+                System.out.print("Grade: " + bullGrade + " and " + cowGrade + ".");
             } else if (!cowGrade.equals("")) {
-                System.out.println("Grade: " + cowGrade + ".");
+                System.out.print("Grade: " + cowGrade + ".");
             } else if (!bullGrade.equals("")) {
-                System.out.println("Grade: " + bullGrade + ".");
+                System.out.print("Grade: " + bullGrade + ".");
             } else {
-                System.out.println("Grade: None.");
+                System.out.print("Grade: None.");
             }
 
-            if (bulls == 4) {
-                System.out.println("Congrats! The secret code is " + code[0] + code[1] + code[2] + code[3] + ".");
+            if (bulls == code.length) {
+                System.out.println("Congratulations! You guessed the secret code.");
+                for (int i : code) {
+                    System.out.print(i);
+                }
+                System.out.println(".");
+
                 guessed = true;
             }
 
@@ -96,33 +103,41 @@ public class BullsCows {
     }
 
     private void setCode() {
-        this.code = new int[4];
-        int intCode = (int) Math.round(Math.random() * 10000);
-        String temp = Integer.toString(intCode);
+        System.out.println("Please, enter the secret code's length:");
 
-        if (intCode > 999) {
-            for (int i = 0; i < this.code.length; i++) {
-                this.code[i] = Integer.parseInt(String.valueOf(temp.charAt(i)));
+        do {
+            Scanner in = new Scanner(System.in);
+            int length = in.nextInt();
+
+            if (length > 10) {
+                System.out.println("Error: can't generate a secret number with a length of " + length +
+                        " because there aren't enough unique digits.");
+            } else {
+                code = new int[length];
+                Set<Character> set = new HashSet<>();
+                StringBuilder builder = new StringBuilder();
+
+                do {
+                    char[] characters = Long.toString(System.nanoTime()).toCharArray();
+                    for (int i = characters.length - 1; i >= 0; i--) {
+                        if (set.size() == 0 && characters[i] == '0') {
+                            continue;
+                        }
+
+                        if (set.add(characters[i])) {
+                            builder.append(characters[i]);
+                        }
+
+                        if (builder.toString().length() == length) {
+                            break;
+                        }
+                    }
+                } while (builder.toString().length() != length);
+
+                for (int i = 0; i < length; i++) {
+                    code[i] = (int) builder.charAt(i) - '0';
+                }
             }
-        } else if (intCode > 99) {
-            this.code[0] = 0;
-            for (int i = 1; i < this.code.length - 1; i++) {
-                this.code[i] = Integer.parseInt(String.valueOf(temp.charAt(i - 1)));
-            }
-        } else if (intCode > 9) {
-            for (int i = 0; i < this.code.length - 2; i++) {
-                this.code[i] = 0;
-            }
-            for (int i = 2; i < this.code.length - 1; i++) {
-                this.code[i] = Integer.parseInt(String.valueOf(temp.charAt(i - 2)));
-            }
-        } else if (intCode > 0) {
-            for (int i = 0; i < this.code.length - 1; i++) {
-                this.code[i] = 0;
-            }
-            this.code[3] = Integer.parseInt(String.valueOf(temp.charAt(0)));
-        } else {
-            Arrays.fill(this.code, 0);
-        }
+        } while (this.code == null || this.code.length < 1);
     }
 }
